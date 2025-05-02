@@ -5,6 +5,9 @@ import openpyxl, xlrd
 import pathlib
 from openpyxl import Workbook
 from openpyxl import load_workbook
+import psycopg2
+from tkinter import messagebox
+
 
 # Aparência do sistema
 ctk.set_appearance_mode("System")
@@ -80,6 +83,33 @@ class App(ctk.CTk):
 
                 ficheiro.save(r"Produtos.xlsx")
                 messagebox.showinfo("Sistema", "Dados salvos com sucesso")
+
+
+            ########## ESSA PARTE CONECTA AO PGADMIN  #############
+            try: 
+                conexao = psycopg2.connect(
+                    host="localhost",
+                    database="produtos_db",
+                    user="postgres",
+                    password="159357.Ab",
+                    port="5432"
+                )
+                cursor = conexao.cursor()
+
+
+                #inserindo as informações na tabela
+
+                cursor.execute("""INSERT INTO produtos (nome_produto, cod_barras, validade, fornecedor, categoria, observacoes)VALUES (%s, %s, %s, %s, %s, %s)""", (nome_produto, cod_barras, validade, fornecedor, categoria, obs))
+
+                conexao.commit()
+                cursor.close()
+                conexao.close()
+
+            except Exception as erro:
+                messagebox.showerror("Erro no banco de dados", f"Erro ao inserir no PostgreSQL:\n{erro}")
+
+##############################################################################################
+
 
         # Função para limpar todos os campos do formulário
         def clear():
