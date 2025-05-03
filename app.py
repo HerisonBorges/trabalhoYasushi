@@ -1,13 +1,20 @@
+'''
+O QUE FOI FEITO NESTE CÓDIGO:
+(Escreva aqui o que você fez no código para facilitar para o próximo entender)
+
+1. Formatação da validade para o padrão dd/mm/aaaa quando terminar de digitar.
+2. Todo vez que salvar o produto, os campos são limpos.
+3. Se clicar fora de qualquer campo, ele perde o foco.
+'''
+
 import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
-import openpyxl, xlrd
+import openpyxl as xl
 import pathlib
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import psycopg2
-from tkinter import messagebox
-
 
 # Aparência do sistema
 ctk.set_appearance_mode("System")
@@ -26,7 +33,7 @@ class App(ctk.CTk):
 
     def appearence(self):
         self.lb_apm = ctk.CTkLabel(self, text="Tema", bg_color="transparent", text_color=['#000', "#fff"]).place(x=50, y=430)
-        self.opt_apm = ctk.CTkOptionMenu(self, values=["Light", "Dark", "System"], command=self.change_apm).place(x=50, y=460)
+        self.opt_apm = ctk.CTkOptionMenu(self, values=["Dark", "Light"], command=self.change_apm).place(x=50, y=460)
 
     def todo_sistema(self):
 
@@ -63,16 +70,18 @@ class App(ctk.CTk):
             # Obtém os valores dos campos
             nome_produto = nome_value.get()
             cod_barras = cod_barras_value.get()
+            formatar_validade("")
             validade = validade_value.get()
             fornecedor = fornecedor_value.get()
             categoria = categoria_combobox.get()
             obs = obs_entry.get(0.0, END)
 
             # Verifica se todos os campos obrigatórios estão preenchidos
-            if (nome_produto == "" or cod_barras == "" or validade == "" or fornecedor == ""):
+            if not all([nome_produto, cod_barras, validade, fornecedor]):
                 messagebox.showerror("Sistema", "Erro!\nPor favor preencha todos os dados")
+                
             else:
-                ficheiro = openpyxl.load_workbook('Produtos.xlsx')
+                ficheiro = xl.load_workbook('Produtos.xlsx')
                 folha = ficheiro.active
                 folha.cell(column=1, row=folha.max_row+1, value=nome_produto)
                 folha.cell(column=2, row=folha.max_row, value=cod_barras)
@@ -83,22 +92,21 @@ class App(ctk.CTk):
 
                 ficheiro.save(r"Produtos.xlsx")
                 messagebox.showinfo("Sistema", "Dados salvos com sucesso")
-
-
+                
+                clear() #Limpa os campos após salvar
+                
             ########## ESSA PARTE CONECTA AO PGADMIN  #############
             try: 
                 conexao = psycopg2.connect(
                     host="localhost",
-                    database="produtos_db",
+                    database="produtos_db", #COLOQUE O NOME DO SEU BANCO DE DADOS
                     user="postgres",
-                    password="159357.Ab",
+                    password="0L0k1nh0_123!", #COLOQUE A SENHA DO SEU BANCO DE DADOS
                     port="5432"
                 )
                 cursor = conexao.cursor()
 
-
                 #inserindo as informações na tabela
-
                 cursor.execute("""INSERT INTO produtos (nome_produto, cod_barras, validade, fornecedor, categoria, observacoes)VALUES (%s, %s, %s, %s, %s, %s)""", (nome_produto, cod_barras, validade, fornecedor, categoria, obs))
 
                 conexao.commit()
@@ -108,9 +116,8 @@ class App(ctk.CTk):
             except Exception as erro:
                 messagebox.showerror("Erro no banco de dados", f"Erro ao inserir no PostgreSQL:\n{erro}")
 
-##############################################################################################
-
-
+            ##############################################################################################
+        
         # Função para limpar todos os campos do formulário
         def clear():
             nome_value.set("")
@@ -131,6 +138,25 @@ class App(ctk.CTk):
         validade_entry = ctk.CTkEntry(self, width=150, textvariable=validade_value, font=("Century Gothic bold", 16), fg_color="transparent")
         fornecedor_entry = ctk.CTkEntry(self, width=200, textvariable=fornecedor_value, font=("Century Gothic bold", 16), fg_color="transparent")
 
+        #Formata a validade para o padrão dd/mm/aaaa
+        def formatar_validade (event): #o "event" recebe o evento "<KeyRelease>" toda vez que o usuário digita
+            validade = validade_value.get()
+            
+            if len(validade) == 8 and validade.isdigit(): 
+                validade_value.set(f"{validade[:2]}/{validade[2:4]}/{validade[4:]}")
+                validade_entry.icursor(len(validade_value.get()))  # Move o cursor para o final do texto
+        
+        #Se sair do compo validade, formata a validade
+        validade_entry.bind("<KeyRelease>", formatar_validade)
+        
+        #Se clicar fora do campo, ele perder o foco
+        def focus_out (event):
+            if event.widget == self:
+                self.focus()
+        
+        # Se clicar fora do campo, ele perder o foco
+        self.bind("<Button-1>", focus_out)
+        
         # Combobox
         categoria_combobox = ctk.CTkComboBox(self, values=["Alimento", "Higiene", "Limpeza", "Outros"], font=("Century Gothic bold", 14), width=150)
         categoria_combobox.set("Alimento")
