@@ -183,6 +183,8 @@ class App(ctk.CTk):
                 except Exception as erro:
                     messagebox.showerror("Erro no banco de dados", f"Erro ao inserir no PostgreSQL:\n{erro}")
 
+                ##############################################################################################
+        
         # Função para limpar todos os campos do formulário
         def clear():
             nome_value.set("")
