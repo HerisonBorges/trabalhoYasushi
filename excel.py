@@ -16,7 +16,9 @@ def salvarExcel ():
             folha['C1'] = "Validade"
             folha['D1'] = "Fornecedor"
             folha['E1'] = "Categoria"
-            folha['F1'] = "Observações"
+            folha['F1'] = "Unidade"
+            folha['G1'] = "Observações"
+            
             
             # Definindo a largura das colunas e deixando em negrito o cabeçalho
             for col in range(1, folha.max_column + 1):
@@ -25,7 +27,7 @@ def salvarExcel ():
                 folha.cell(row=1, column=col).font = xl.styles.Font(bold=True)
             
             # Criando a tabela
-            tab = Table(displayName="TabelaProdutos", ref=f"A1:F{folha.max_row}")
+            tab = Table(displayName="TabelaProdutos", ref=f"A1:G{folha.max_row}")
             
             # Estilo da tabela
             estilo = TableStyleInfo(

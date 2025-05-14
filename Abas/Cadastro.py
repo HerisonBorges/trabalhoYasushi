@@ -22,11 +22,12 @@ def Cadastro(tab):
             validar_validade(validade_value.get())
             validade = validade_value.get()
             fornecedor = fornecedor_value.get()
+            unidade = unidade_value.get()#matheus
             categoria = categoria_combobox.get()
             obs = obs_entry.get(0.0, END)
 
             # Verifica se todos os campos obrigatórios estão preenchidos
-            if not all([nome_produto, cod_produto, validade, fornecedor]):
+            if not all([nome_produto, cod_produto, validade, fornecedor, unidade]):
                 messagebox.showerror("Sistema", "Erro!\nPor favor preencha todos os dados")
                 
             else:
@@ -34,17 +35,17 @@ def Cadastro(tab):
                 folha = ficheiro.active
                 
                 # Adiciona os dados na próxima linha disponível
-                folha.append([nome_produto, cod_produto, validade, fornecedor, categoria, obs])
+                folha.append([nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs])
 
                 # atualiza a tabela
                 tab = folha.tables['TabelaProdutos']
-                tab.ref = f"A1:F{folha.max_row}"
+                tab.ref = f"A1:G{folha.max_row}"
                 
                 ficheiro.save(r"Produtos.xlsx")
                 messagebox.showinfo("Sistema", "Dados salvos com sucesso")
                 
                 clear() # Limpa os campos após salvar
-                database.salvarBancoDeDados(nome_produto, cod_produto, validade, fornecedor, categoria, obs) # Salva os dados no banco de dados
+                database.salvarBancoDeDados(nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs) # Salva os dados no banco de dados
         
         # Função para limpar todos os campos do formulário
         def clear():
@@ -52,6 +53,7 @@ def Cadastro(tab):
             cod_produto_value.set("")
             validade_value.set("")
             fornecedor_value.set("")
+            unidade_value.set("")
             obs_entry.delete(0.0, END)
 
         # Variáveis de texto
@@ -59,12 +61,19 @@ def Cadastro(tab):
         cod_produto_value = StringVar()
         validade_value = StringVar()
         fornecedor_value = StringVar()
+        unidade_value = StringVar()
 
         # Entradas
         nome_entry = ctk.CTkEntry(tab, width=350, textvariable=nome_value, font=("Century Gothic bold", 16), fg_color="transparent")
         cod_produto_entry = ctk.CTkEntry(tab, width=200, textvariable=cod_produto_value, font=("Century Gothic bold", 16), fg_color="transparent")
         validade_entry = ctk.CTkEntry(tab, width=150, textvariable=validade_value, font=("Century Gothic bold", 16), fg_color="transparent")
         fornecedor_entry = ctk.CTkEntry(tab, width=200, textvariable=fornecedor_value, font=("Century Gothic bold", 16), fg_color="transparent")
+        unidade_entry = ctk.CTkEntry(tab, width=150, textvariable=unidade_value, font=("Century Gothic bold", 16), fg_color="transparent")#matheus
+        # Campo de unidade
+        
+        
+        
+
 
         # Formata a validade para o padrão dd/mm/aaaa
         def formatar_validade(event): # "event" recebe o evento "<KeyRelease>" toda vez que o usuário digita
@@ -111,7 +120,7 @@ def Cadastro(tab):
         categoria_combobox.set("Alimento")
 
         # Entrada de observações
-        obs_entry = ctk.CTkTextbox(tab, width=450, height=150, font=("Arial", 18), border_color="#aaa", border_width=2, fg_color="transparent")
+        obs_entry = ctk.CTkTextbox(tab, width=380, height=130, font=("Arial", 18), border_color="#aaa", border_width=2, fg_color="transparent")
 
         # Rótulos para cada campo
         lb_nome = ctk.CTkLabel(tab, text="Nome do Produto:", font=("century gothic bold", 16), text_color=["#000", "#fff"])
@@ -119,6 +128,7 @@ def Cadastro(tab):
         lb_validade = ctk.CTkLabel(tab, text="Validade:", font=("century gothic bold", 16), text_color=["#000", "#fff"])
         lb_categoria = ctk.CTkLabel(tab, text="Categoria", font=("century gothic bold", 16), text_color=["#000", "#fff"])
         lb_fornecedor = ctk.CTkLabel(tab, text="Fornecedor", font=("century gothic bold", 16), text_color=["#000", "#fff"])
+        lb_unidade = ctk.CTkLabel(tab, text="Unidade", font=("century gothic bold", 16), text_color=["#000", "#fff"]) #matheus
         lb_obs = ctk.CTkLabel(tab, text="Observações", font=("century gothic bold", 16), text_color=["#000", "#fff"])
 
         # Botões para salvar e limpar os dados
@@ -141,5 +151,9 @@ def Cadastro(tab):
         lb_fornecedor.place(x=50, y=140)
         fornecedor_entry.place(x=50, y=170)
 
-        lb_obs.place(x=50, y=210)
-        obs_entry.place(x=200, y=210)
+        lb_unidade.place(x=50, y=200)
+        unidade_entry.place(x=50, y=230)#matheus
+
+
+        lb_obs.place(x=270, y=200)
+        obs_entry.place(x=270, y=230)

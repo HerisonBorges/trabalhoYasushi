@@ -1,21 +1,21 @@
 import psycopg2
 from tkinter import messagebox
 
-def salvarBancoDeDados(nome_produto, cod_produto, validade, fornecedor, categoria, obs):
+def salvarBancoDeDados(nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs):
     try:
         conexao = psycopg2.connect(
             host="localhost",
-            database="produtos_db", # COLOQUE O NOME DO SEU BANCO DE DADOS
+            database="Projetosexta", # COLOQUE O NOME DO SEU BANCO DE DADOS
             user="postgres",
-            password="0L0k1nh0_123!", # COLOQUE A SENHA DO SEU BANCO DE DADOS
+            password="1234", # COLOQUE A SENHA DO SEU BANCO DE DADOS
             port="5432"
         )
         cursor = conexao.cursor()
 
         # inserindo as informações na tabela
-        cursor.execute("""INSERT INTO produtos (nome_produto, cod_produto, validade, fornecedor, categoria, observacoes) 
-                        VALUES (%s, %s, %s, %s, %s, %s)""", 
-                        (nome_produto, cod_produto, validade, fornecedor, categoria, obs))
+        cursor.execute("""INSERT INTO produtos (nome_produto, cod_produto, validade, fornecedor, categoria, unidade, observacoes) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)""", 
+                        (nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs))
 
         conexao.commit()
         cursor.close()
