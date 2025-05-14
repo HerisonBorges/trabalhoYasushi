@@ -21,7 +21,12 @@ O QUE PRECISA SER FEITO, ANEXADO A IDEIAS DE MELHORAIS
 
 1 - IMPLEMENTAR LOGICA PARA CARREGAR DADOS PARA EDIÇÃO, ( SE FOR POSSIVEL)
 2- IMPLEMENTAR LOGICA PARA GERAR RELATORIOS
-3- IMPLEMENTAR LOGICA DE UNIDADE POR PRODUTO
+
+13/052025
+1- IMPLEMENTAR LOGICA DE UNIDADE POR PRODUTO #MATHEUS
+
+14/05/2025
+2- IMPLEMENTADO A TELA DE LOGIN  #MATHEUS
 '''
 
 #Criar caixa container para preenchimento, título e geral
@@ -37,7 +42,7 @@ Se quiser importar um arquivo, basta fazer assim: import nome_arquivo ou import 
 Se quiser importar uma função específica, faça assim: from nome_arquivo import nome_funcao ou from nome_da_pasta.nome_arquivo import nome_funcao
 '''
 
-import database  # atualize esse arquivo com a nova função abaixo
+import database  
 from Abas import Cadastro
 from Abas import Pesquisa
 from Abas import Edicao
@@ -92,5 +97,5 @@ class App(ctk.CTk):
         ctk.set_appearance_mode(nova_aparencia)
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    from Login import login
+    login()
