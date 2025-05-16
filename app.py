@@ -10,6 +10,7 @@ IDEIAS PARA MELHORIAS:
 5. Criar uma área de relatórios.
 6. Recomendar nome de produtos e fornecedores baseados no que já existe.
 '''
+
 '''
 12/05/2025
 
@@ -22,25 +23,18 @@ O QUE PRECISA SER FEITO, ANEXADO A IDEIAS DE MELHORAIS
 1 - IMPLEMENTAR LOGICA PARA CARREGAR DADOS PARA EDIÇÃO, ( SE FOR POSSIVEL)
 2- IMPLEMENTAR LOGICA PARA GERAR RELATORIOS
 
-13/052025
+13/05/2025
 1- IMPLEMENTAR LOGICA DE UNIDADE POR PRODUTO #MATHEUS
 
 14/05/2025
 2- IMPLEMENTADO A TELA DE LOGIN  #MATHEUS
 '''
 
-#Criar caixa container para preenchimento, título e geral
-
 import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
 import openpyxl as xl
 from datetime import datetime
-
-'''
-Se quiser importar um arquivo, basta fazer assim: import nome_arquivo ou import nome_da_pasta.nome_arquivo
-Se quiser importar uma função específica, faça assim: from nome_arquivo import nome_funcao ou from nome_da_pasta.nome_arquivo import nome_funcao
-'''
 
 import database  
 from Abas import Cadastro
@@ -61,25 +55,30 @@ class App(ctk.CTk):
 
     def layout_config(self):
         self.title("Sistema de Gestão de Produtos")
-        self.geometry("700x500")
+        self.geometry("820x650")  # Janela maior
 
     def appearence(self):
-        self.lb_apm = ctk.CTkLabel(self, text="Tema", bg_color="transparent", text_color=['#000', "#fff"]).place(x=50, y=430)
-        self.opt_apm = ctk.CTkOptionMenu(self, values=["Dark", "Light"], command=self.change_apm).place(x=50, y=460)
+        self.lb_apm = ctk.CTkLabel(self, text="Tema", bg_color="transparent", text_color=['#000', "#fff"])
+        self.lb_apm.place(x=50, y=580)
+        self.opt_apm = ctk.CTkOptionMenu(self, values=["Dark", "Light"], command=self.change_apm)
+        self.opt_apm.place(x=50, y=610)
     
     def criarContainers(self):
-        self.containerTitulo = ctk.CTkFrame(self, width=700, height=50, corner_radius=0, fg_color="teal")
+        # Container título - topo da janela, largura total, altura menor
+        self.containerTitulo = ctk.CTkFrame(self, width=820, height=50, corner_radius=0, fg_color="teal")
         self.containerTitulo.place(x=0, y=0)
 
         title = ctk.CTkLabel(self.containerTitulo, text="Sistema de Gestão de Produtos", 
-                             font=("century gothic bold", 24), text_color="#fff", bg_color="transparent")
+                             font=("Century Gothic Bold", 24), text_color="#fff", bg_color="transparent")
         title.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.containerAbas = ctk.CTkFrame(self, width=700, height=450, corner_radius=0, fg_color="transparent")
-        self.containerAbas.place(x=0, y=50)
+        # Container para as abas - ocupa espaço abaixo do título
+        self.containerAbas = ctk.CTkFrame(self, width=800, height=510, corner_radius=0, fg_color="transparent")
+        self.containerAbas.place(x=10, y=60)  # pequeno padding lateral e em cima
     
     def CriandoAbas(self):
-        self.tabview = ctk.CTkTabview(self.containerAbas, width=700, height=450)
+        # Tabview dentro do containerAbas, maior para aproveitar espaço
+        self.tabview = ctk.CTkTabview(self.containerAbas, width=800, height=510)
         self.tabview.place(x=0, y=0)
 
         self.tabview.add("Cadastro")

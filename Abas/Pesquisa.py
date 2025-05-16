@@ -1,63 +1,53 @@
 import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
-import openpyxl as xl
+import database  
 
 def executarPesquisa(self):
-        termo = self.entryPesquisa.get().strip()  # Obtém o termo de pesquisa
+    termo = self.entryPesquisa.get().strip()
+    
+    if not termo:
+        messagebox.showwarning("Pesquisa", "Por favor, digite um termo para pesquisar")
+        return
+    
+    try:
+        resultados = database.buscar_produto_por_termo(termo)
         
-        if not termo:
-            messagebox.showwarning("Pesquisa", "Por favor, digite um termo para pesquisar")
-            return
+        self.resultadosPesquisa.configure(state="normal")
+        self.resultadosPesquisa.delete(1.0, END)
         
-        try:
-            # Carrega o arquivo Excel
-            workbook = xl.load_workbook('Produtos.xlsx')
-            sheet = workbook.active
+        if resultados:
+            texto = ""
+            for row in resultados:
+                texto += (f"Produto: {row[0]}\n"
+                          f"Código: {row[1]}\n"
+                          f"Validade: {row[2]}\n"
+                          f"Fornecedor: {row[3]}\n"
+                          f"Categoria: {row[4]}\n"
+                          f"Unidade: {row[5]}\n"
+                          f"Observações: {row[6]}\n"
+                          + "="*50 + "\n")
+            self.resultadosPesquisa.insert(END, texto)
+        else:
+            self.resultadosPesquisa.insert(END, "Nenhum produto encontrado com esse termo.")
+        
+        self.resultadosPesquisa.configure(state="disabled")
             
-            resultados = []
-            
-            # Procura em todas as linhas (exceto cabeçalho)
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                # Verifica se o termo está em qualquer campo (nome, código, fornecedor)
-                if (termo.lower() in str(row[0]).lower() or  # Nome do produto
-                    termo.lower() in str(row[1]).lower() or  # Código do Produto
-                    termo.lower() in str(row[3]).lower()):   # Fornecedor
-                    
-                    resultados.append(f"Produto: {row[0]}\nCódigo: {row[1]}\nValidade: {row[2]}\nFornecedor: {row[3]}\nCategoria: {row[4]}\nObs: {row[5]}\n{'='*50}\n")
-            
-            if resultados:
-                self.resultadosPesquisa.delete(1.0, END)  # Limpa resultados anteriores
-                self.resultadosPesquisa.insert(END, "".join(resultados))
-            else:
-                messagebox.showinfo("Pesquisa", "Nenhum produto encontrado com esse termo")
-                
-        except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao pesquisar produtos:\n{str(e)}")
+    except Exception as e:
+        messagebox.showerror("Erro", f"Erro ao pesquisar produtos:\n{str(e)}")
 
 def setupPesquisa(self, tab):
-    # aba de pesquisa
-    lblTitulo = ctk.CTkLabel(tab, text="Pesquisar Produtos", 
-                    font=("Century Gothic", 20, "bold"))
-    lblTitulo.pack(pady=20)
+    frame = ctk.CTkFrame(tab)
+    frame.pack(padx=20, pady=20, fill="both", expand=True)
 
-    # campo de busca
-    self.entryPesquisa = ctk.CTkEntry(
-        tab,
-        width=400,
-        placeholder_text="Digite nome, codigo, ou fornecedor"
-    )
-    self.entryPesquisa.pack(pady=10)
+    lblTitulo = ctk.CTkLabel(frame, text="Pesquisar Produtos", font=("Century Gothic", 20, "bold"))
+    lblTitulo.grid(row=0, column=0, columnspan=3, pady=(0, 20))
 
-    # botao de pesquisa
-    botaoPesquisa = ctk.CTkButton(
-        tab,
-        text="BUSCAR",
-        fg_color="#2ecc71",
-        command=self.executarPesquisa
-    )
-    botaoPesquisa.pack(pady=10)
+    self.entryPesquisa = ctk.CTkEntry(frame, width=400, placeholder_text="Digite nome, código ou fornecedor")
+    self.entryPesquisa.grid(row=1, column=0, sticky="w", padx=(0, 10))
 
-    # Area de resultados
-    self.resultadosPesquisa = ctk.CTkTextbox(tab, width=650, height=300)
-    self.resultadosPesquisa.pack(pady=20)
+    botaoPesquisa = ctk.CTkButton(frame, text="BUSCAR", fg_color="#2ecc71", command=lambda: executarPesquisa(self))
+    botaoPesquisa.grid(row=1, column=1, sticky="w")
+
+    self.resultadosPesquisa = ctk.CTkTextbox(frame, width=650, height=300, state="disabled")
+    self.resultadosPesquisa.grid(row=2, column=0, columnspan=3, pady=20)
