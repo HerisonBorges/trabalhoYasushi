@@ -31,17 +31,7 @@ def Cadastro(tab):
                 messagebox.showerror("Sistema", "Erro!\nPor favor preencha todos os dados")
                 
             else:
-                ficheiro = xl.load_workbook('Produtos.xlsx')
-                folha = ficheiro.active
                 
-                # Adiciona os dados na próxima linha disponível
-                folha.append([nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs])
-
-                # atualiza a tabela
-                tab = folha.tables['TabelaProdutos']
-                tab.ref = f"A1:G{folha.max_row}"
-                
-                ficheiro.save(r"Produtos.xlsx")
                 messagebox.showinfo("Sistema", "Dados salvos com sucesso")
                 
                 clear() # Limpa os campos após salvar
