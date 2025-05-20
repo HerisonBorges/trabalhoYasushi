@@ -2,17 +2,24 @@
 import psycopg2
 from tkinter import messagebox
 
-# Função para inserir um novo produto no banco de dados
-def salvarBancoDeDados(nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs):
+def conectarBancoDeDados():
     try:
         # Conecta ao banco de dados PostgreSQL
         conexao = psycopg2.connect(
             host="localhost",
-            database="Projetosexta",
+            database="produtos_db",
             user="postgres",
-            password="1234",
-            port="5432"
+            password="0l0k1nh0123",
         )
+        return conexao
+    except Exception as erro:
+        # Mostra mensagem de erro caso a conexão falhe
+        messagebox.showerror("Erro no banco de dados", f"Erro ao conectar ao PostgreSQL\n{erro}")
+        return None
+
+# Função para inserir um novo produto no banco de dados
+def insert(nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs):
+        conexao = conectarBancoDeDados()
         cursor = conexao.cursor()
         
         # Executa o comando de inserção (INSERT)
@@ -22,24 +29,12 @@ def salvarBancoDeDados(nome_produto, cod_produto, validade, fornecedor, categori
         """, (nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs))
         
         # Confirma a inserção no banco
-        conexao.commit()
-        cursor.close()
-        conexao.close()
-    
-    except Exception as erro:
-        # Mostra mensagem de erro caso a operação falhe
-        messagebox.showerror("Erro no banco de dados", f"Erro ao inserir no PostgreSQL:\n{erro}")
+        conexao.commit() #Salva as alterações
+        cursor.close() # Fecha o QueryTool
 
 # Função para buscar um único produto com base em um campo específico
-def buscar_produto_por_campo(campo, valor):
-    try:
-        conexao = psycopg2.connect(
-            host="localhost",
-            database="Projetosexta",
-            user="postgres",
-            password="1234",
-            port="5432"
-        )
+def select(campo, valor):
+        conexao = conectarBancoDeDados()
         cursor = conexao.cursor()
 
         # Monta dinamicamente a consulta SQL usando o nome do campo (ex: cod_produto, nome_produto, etc)
@@ -51,25 +46,14 @@ def buscar_produto_por_campo(campo, valor):
         cursor.execute(query, (valor,))
         resultado = cursor.fetchone()  # Retorna apenas um resultado
         cursor.close()
-        conexao.close()
+
         return resultado
-    
-    except Exception as erro:
-        messagebox.showerror("Erro no banco de dados", f"Erro ao buscar no PostgreSQL:\n{erro}")
-        return None
 
 # Função para atualizar os dados de um produto já existente
-def atualizar_produto(cod_antigo, novos_dados):
-    try:
-        conexao = psycopg2.connect(
-            host="localhost",
-            database="Projetosexta",
-            user="postgres",
-            password="1234",
-            port="5432"
-        )
+def update(cod_antigo, novos_dados):
+        conexao = conectarBancoDeDados()
         cursor = conexao.cursor()
-
+        
         # Comando UPDATE, usando o código antigo para localizar o registro correto
         cursor.execute("""
             UPDATE produtos SET
@@ -94,25 +78,14 @@ def atualizar_produto(cod_antigo, novos_dados):
 
         conexao.commit()
         cursor.close()
-        conexao.close()
+
         return True  # Retorna True se a operação for bem-sucedida
 
-    except Exception as erro:
-        messagebox.showerror("Erro no banco de dados", f"Erro ao atualizar no PostgreSQL:\n{erro}")
-        return False  # Retorna False se algo der errado
-
 # Função para buscar produtos com base em um termo que pode estar no nome, código ou fornecedor
-def buscar_produto_por_termo(termo):
-    try:
-        conexao = psycopg2.connect(
-            host="localhost",
-            database="Projetosexta",
-            user="postgres",
-            password="1234",
-            port="5432"
-        )
+def selectSpecific(termo):
+        conexao = conectarBancoDeDados()
         cursor = conexao.cursor()
-
+        
         # Consulta usando ILIKE para busca insensível a maiúsculas/minúsculas
         query = """
             SELECT nome_produto, cod_produto, validade, fornecedor, categoria, unidade, observacoes
@@ -123,11 +96,7 @@ def buscar_produto_por_termo(termo):
         """
         like_termo = f"%{termo}%"  # Formata o termo para busca parcial
         cursor.execute(query, (like_termo, like_termo, like_termo))
+        
         resultados = cursor.fetchall()  # Retorna todos os resultados encontrados
         cursor.close()
-        conexao.close()
         return resultados
-
-    except Exception as erro:
-        messagebox.showerror("Erro no banco de dados", f"Erro ao buscar no PostgreSQL:\n{erro}")
-        return []  # Retorna lista vazia em caso de erro

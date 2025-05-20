@@ -97,18 +97,14 @@ class App(ctk.CTk):
     def change_apm(self, nova_aparencia):
         ctk.set_appearance_mode(nova_aparencia)
 
-#from Login import login
-#login()
-
 from Login import login  # importa sua função de login
-from app import App        # importa a classe App (sua janela principal)
+from app import App      # importa a classe App (sua janela principal)
 
 def main():
-    # Abre o login e espera o resultado
-    logado = login()
-    if logado:
+    app = App()
+    logado = login(app)
+    if logado['login']:
         # Se login OK, abre o app principal
-        app = App()
         app.mainloop()
     else:
         print("Login não realizado. Saindo...")

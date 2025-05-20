@@ -16,7 +16,7 @@ def setupEdicao(app, tab):
     # Critério de busca (rótulo + combobox)
     ctk.CTkLabel(frame, text="Buscar por:", anchor="w").grid(row=1, column=0, sticky="w")
     criterio_var = StringVar(value="cod_produto")  # Valor padrão
-    criterio_combobox = ctk.CTkComboBox(frame, values=["cod_produto", "nome_produto", "fornecedor"], variable=criterio_var, width=150)
+    criterio_combobox = ctk.CTkComboBox(frame, values=["cod_produto", "nome_produto", "fornecedor"], variable=criterio_var, width=150, state="readonly")
     criterio_combobox.grid(row=1, column=1, sticky="w", padx=(5,20))
 
     # Campo onde o usuário digita o valor a ser buscado
@@ -61,7 +61,7 @@ def carregarDadosEdicao(app, criterio):
         return
 
     # Busca no banco de dados com base no critério e valor fornecidos
-    dados = database.buscar_produto_por_campo(criterio, valor)
+    dados = database.select(criterio, valor)
     if dados:
         # Cria um dicionário com os dados antigos usando os nomes dos campos
         app.dados_antigos = dict(zip(
@@ -95,7 +95,7 @@ def salvarAlteracoes(app):
     cod_produto_original = app.dados_antigos.get("cod_produto")
 
     # Chama a função de atualização no banco
-    sucesso = database.atualizar_produto(cod_produto_original, novos_dados)
+    sucesso = database.update(cod_produto_original, novos_dados)
     if sucesso:
         messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
         app.dados_antigos = novos_dados.copy()  # Atualiza os dados armazenados como referência

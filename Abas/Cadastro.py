@@ -4,8 +4,6 @@ from tkinter import *
 from tkinter import messagebox
 import openpyxl as xl
 from datetime import datetime
-
-import excel  # módulo para operações com Excel
 import database  # módulo para interações com o banco de dados
 
 # Função principal da aba Cadastro
@@ -33,7 +31,7 @@ def Cadastro(tab):
         else:
             messagebox.showinfo("Sistema", "Dados salvos com sucesso")
             clear()  # Limpa os campos
-            database.salvarBancoDeDados(  # Salva no banco
+            database.insert(  # Salva no banco
                 nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs
             )
 

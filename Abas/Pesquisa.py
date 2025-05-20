@@ -16,7 +16,7 @@ def executarPesquisa(self):
     
     try:
         # Busca produtos no banco de dados usando o termo
-        resultados = database.buscar_produto_por_termo(termo)
+        resultados = database.selectSpecific(termo)
         
         # Habilita o campo de resultados para edição temporária
         self.resultadosPesquisa.configure(state="normal")
