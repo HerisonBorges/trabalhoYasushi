@@ -3,6 +3,7 @@ import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
 import database  # Módulo responsável pelas operações com o banco de dados
+import util  # módulo com funções auxiliares
 
 # Função que realiza a busca com base no termo digitado
 def executarPesquisa(self):
@@ -68,3 +69,5 @@ def setupPesquisa(self, tab):
     # Campo de texto que exibe os resultados da busca (inicialmente desabilitado)
     self.resultadosPesquisa = ctk.CTkTextbox(frame, width=650, height=300, state="disabled")
     self.resultadosPesquisa.grid(row=2, column=0, columnspan=3, pady=20)
+    
+    self.bind("<Button-1>", util.tirarFoco)  # Remove o foco do campo de busca ao clicar fora dele

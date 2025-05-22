@@ -5,20 +5,21 @@ from tkinter import messagebox
 import openpyxl as xl
 from datetime import datetime
 import database  # módulo para interações com o banco de dados
+import util  # módulo com funções auxiliares
 
 # Função principal da aba Cadastro
 def Cadastro(tab):
     # Mensagem inicial para o usuário
     span = ctk.CTkLabel(tab, text="Por favor, preencha todos os campos do formulário!", 
                         font=("century gothic bold", 16), text_color=["#000", "#fff"]).place(x=50, y=20)
-
+    
     # Função chamada ao clicar em "SALVAR DADOS"
     def submit():
         # Captura os valores inseridos nos campos
         nome_produto = nome_value.get()
         cod_produto = cod_produto_value.get()
-        formatar_validade("")  # Garante que a validade seja formatada corretamente
-        validar_validade(validade_value.get())  # Valida a validade
+        util.formatar_validade("", validade_value, validade_entry)  # Garante que a validade seja formatada corretamente
+        sucesso = util.validar_validade(validade_value.get(), validade_value)  # Valida a validade
         validade = validade_value.get()
         fornecedor = fornecedor_value.get()
         unidade = unidade_value.get()  # Matheus
@@ -26,23 +27,16 @@ def Cadastro(tab):
         obs = obs_entry.get(0.0, END)  # Captura as observações
 
         # Verifica se todos os campos obrigatórios foram preenchidos
-        if not all([nome_produto, cod_produto, validade, fornecedor, unidade]):
+        if sucesso == "erro":
+            pass
+        elif not all([nome_produto, cod_produto, validade, fornecedor, unidade]):
             messagebox.showerror("Sistema", "Erro!\nPor favor preencha todos os dados")
         else:
             messagebox.showinfo("Sistema", "Dados salvos com sucesso")
-            clear()  # Limpa os campos
+            util.clear([nome_value, cod_produto_value, validade_value, fornecedor_value, unidade_value, obs_entry])  # Limpa os campos
             database.insert(  # Salva no banco
                 nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs
             )
-
-    # Limpa todos os campos do formulário
-    def clear():
-        nome_value.set("")
-        cod_produto_value.set("")
-        validade_value.set("")
-        fornecedor_value.set("")
-        unidade_value.set("")
-        obs_entry.delete(0.0, END)
 
     # Variáveis que armazenam os dados digitados
     nome_value = StringVar()
@@ -58,43 +52,8 @@ def Cadastro(tab):
     fornecedor_entry = ctk.CTkEntry(tab, width=200, textvariable=fornecedor_value, font=("Century Gothic bold", 16), fg_color="transparent")
     unidade_entry = ctk.CTkEntry(tab, width=150, textvariable=unidade_value, font=("Century Gothic bold", 16), fg_color="transparent")  # Matheus
 
-    # Função que formata automaticamente a data de validade para o padrão dd/mm/aaaa
-    def formatar_validade(event):
-        validade = validade_value.get()
-        if len(validade) == 8 and validade.isdigit():
-            validade_value.set(f"{validade[:2]}/{validade[2:4]}/{validade[4:]}")
-            validade_entry.icursor(len(validade_value.get()))  # Move o cursor para o fim
-
-    # Valida se a data é válida e se o produto está vencido
-    def validar_validade(valida):
-        try:
-            dia = int(valida[0:2])
-            mes = int(valida[3:5])
-            ano = valida[6:10]
-        except ValueError:
-            messagebox.showerror("Sistema", "Erro!\nFormato de validade inválido.\nUse o formato dd/mm/aaaa")
-            validade_value.set("")
-            return
-
-        data_atual = datetime.now()
-
-        # Checa o comprimento
-        if len(valida) != 10:
-            messagebox.showerror("Sistema", "Erro!\nFormato de validade inválido.\nUse o formato dd/mm/aaaa")
-            validade_value.set("")
-
-        # Verifica validade dos valores
-        elif dia > 31 or (mes > 12 or mes <= 0):
-            messagebox.showerror("Sistema", "Erro!\nData inválida.\nVerifique o dia, mês e ano")
-            validade_value.set("")
-
-        # Verifica se a data está vencida
-        elif datetime.strptime(valida, "%d/%m/%Y") < data_atual:
-            messagebox.showerror("Sistema", "Produto vencido!\nVerifique a validade do produto")
-            validade_value.set("")
-
     # Aplica a formatação automática da validade enquanto o usuário digita
-    validade_entry.bind("<KeyRelease>", formatar_validade)
+    validade_entry.bind("<KeyRelease>", lambda event: util.formatar_validade(event, validade_value, validade_entry))
 
     # Combobox de categoria do produto
     categoria_combobox = ctk.CTkComboBox(tab, values=["Alimento", "Higiene", "Limpeza", "Outros"], 
@@ -115,10 +74,20 @@ def Cadastro(tab):
     lb_obs = ctk.CTkLabel(tab, text="Observações", font=("century gothic bold", 16), text_color=["#000", "#fff"])
 
     # Botões para salvar e limpar dados
-    btn_submit = ctk.CTkButton(tab, text="SALVAR DADOS", command=submit, fg_color="#151", hover_color="#131")
+    btn_submit = ctk.CTkButton(
+        tab, 
+        text="SALVAR DADOS", 
+        command=submit, 
+        fg_color="#151", 
+        hover_color="#131")
     btn_submit.place(x=300, y=370)
 
-    btn_clear = ctk.CTkButton(tab, text="LIMPAR CAMPOS", command=clear, fg_color="#555", hover_color="#333")
+    btn_clear = ctk.CTkButton(
+        tab, 
+        text="LIMPAR CAMPOS", 
+        command=lambda: util.clear([nome_value, cod_produto_value, validade_value, fornecedor_value, unidade_value, obs_entry]),
+        fg_color="#555", 
+        hover_color="#333")
     btn_clear.place(x=500, y=370)
 
     # Posicionamento dos elementos na tela
@@ -142,3 +111,5 @@ def Cadastro(tab):
 
     lb_obs.place(x=270, y=200)
     obs_entry.place(x=270, y=230)
+
+    tab.bind("<Button-1>", util.tirarFoco)  # Remove o foco do campo de busca ao clicar fora dele

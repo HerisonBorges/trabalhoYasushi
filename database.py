@@ -32,8 +32,25 @@ def insert(nome_produto, cod_produto, validade, fornecedor, categoria, unidade, 
         conexao.commit() #Salva as alterações
         cursor.close() # Fecha o QueryTool
 
+def selectAll():
+    conexao = conectarBancoDeDados()
+    cursor = conexao.cursor()
+
+    # Executa o comando SELECT para buscar todos os produtos
+    cursor.execute("""
+        SELECT nome_produto, cod_produto, validade, fornecedor, categoria, unidade, observacoes
+        FROM produtos
+    """)
+    
+    # Retorna todos os resultados encontrados
+    resultados = cursor.fetchall()
+    cursor.close()
+    conexao.close()
+
+    return resultados
+
 # Função para buscar um único produto com base em um campo específico
-def select(campo, valor):
+def selectCampo(campo, valor):
         conexao = conectarBancoDeDados()
         cursor = conexao.cursor()
 
@@ -48,6 +65,26 @@ def select(campo, valor):
         cursor.close()
 
         return resultado
+# Função para buscar produtos com base em um termo que pode estar no nome, código ou fornecedor
+def selectSpecific(termo):
+        conexao = conectarBancoDeDados()
+        cursor = conexao.cursor()
+        
+        # Consulta usando ILIKE para busca insensível a maiúsculas/minúsculas
+        query = """
+            SELECT nome_produto, cod_produto, validade, fornecedor, categoria, unidade, observacoes
+            FROM produtos
+            WHERE nome_produto ILIKE %s
+               OR cod_produto ILIKE %s
+               OR fornecedor ILIKE %s
+               OR categoria ILIKE %s
+        """
+        like_termo = f"%{termo}%"  # Formata o termo para busca parcial
+        cursor.execute(query, (like_termo, like_termo, like_termo, like_termo))
+        
+        resultados = cursor.fetchall()  # Retorna todos os resultados encontrados
+        cursor.close()
+        return resultados
 
 # Função para atualizar os dados de um produto já existente
 def update(cod_antigo, novos_dados):
@@ -80,23 +117,3 @@ def update(cod_antigo, novos_dados):
         cursor.close()
 
         return True  # Retorna True se a operação for bem-sucedida
-
-# Função para buscar produtos com base em um termo que pode estar no nome, código ou fornecedor
-def selectSpecific(termo):
-        conexao = conectarBancoDeDados()
-        cursor = conexao.cursor()
-        
-        # Consulta usando ILIKE para busca insensível a maiúsculas/minúsculas
-        query = """
-            SELECT nome_produto, cod_produto, validade, fornecedor, categoria, unidade, observacoes
-            FROM produtos
-            WHERE nome_produto ILIKE %s
-               OR cod_produto ILIKE %s
-               OR fornecedor ILIKE %s
-        """
-        like_termo = f"%{termo}%"  # Formata o termo para busca parcial
-        cursor.execute(query, (like_termo, like_termo, like_termo))
-        
-        resultados = cursor.fetchall()  # Retorna todos os resultados encontrados
-        cursor.close()
-        return resultados

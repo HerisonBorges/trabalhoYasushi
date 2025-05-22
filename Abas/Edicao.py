@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
 import database
+import util
 
 # Função para configurar a aba de edição de produto
 def setupEdicao(app, tab):
@@ -52,6 +53,8 @@ def setupEdicao(app, tab):
     btn_salvar = ctk.CTkButton(frame, text="SALVAR ALTERAÇÕES", fg_color="#15a",
                                command=lambda: salvarAlteracoes(app))
     btn_salvar.grid(row=i+2, column=0, columnspan=4, pady=10)
+    
+    frame.bind("<Button-1>", util.tirarFoco)  # Remove o foco do campo de busca ao clicar fora dele
 
 # Função para buscar dados do produto e preencher os campos
 def carregarDadosEdicao(app, criterio):
@@ -61,7 +64,7 @@ def carregarDadosEdicao(app, criterio):
         return
 
     # Busca no banco de dados com base no critério e valor fornecidos
-    dados = database.select(criterio, valor)
+    dados = database.selectCampo(criterio, valor)
     if dados:
         # Cria um dicionário com os dados antigos usando os nomes dos campos
         app.dados_antigos = dict(zip(

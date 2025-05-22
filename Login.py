@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import tkinter as tk
-import database
+import util
 
 #Na parte de login, o usuário não precisa informar os dados do banco de dados, apenas o usuário e a senha que a gente decidiu para os adm (que seria Usuário: Admin Senha: 1234).
 
@@ -13,13 +13,7 @@ def login(master):
     root.title("Login")
     
     #Centralizando a janela
-    largura_janela = 420
-    altura_janela = 400
-
-    pos_x = int(root.winfo_screenwidth() / 2 - largura_janela / 2)
-    pos_y = int(root.winfo_screenheight() / 2 - altura_janela / 2)
-
-    root.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
+    util.centralizar(420, 400, root)
     root.resizable(False, False)
 
     frame = ctk.CTkFrame(root, corner_radius=15, fg_color="#1e1e1e")
@@ -46,6 +40,8 @@ def login(master):
         if verificar_login(usuario, senha):
             sucesso['login'] = True
             root.destroy()
+        elif not usuario or not senha:
+            messagebox.showerror("Erro", "Preencha todos os campos.")
         else:
             messagebox.showerror("Erro", "Usuário ou senha incorretos.")
 

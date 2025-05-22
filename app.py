@@ -1,13 +1,10 @@
 # IDEIAS PARA MELHORIAS:
 '''
 1. Criar uma área de remoção de produtos.
-2. Criar uma área de edição de produtos.
-    2.1. Edição de tipos de produtos.
-    2.2. Edição das observações.
-3. Criar uma área de pesquisa de produtos.
-4. Criar área de login para conectar ao banco de dados.
-5. Criar uma área de relatórios.
+'''
 
+'''
+ATENÇÃO: PESQUISA2 VAI SER A NOVA ABA PESQUISA! PESQUISA AINDA EXISTE POR CAUSA QUE PESQUISA2 NÃO ESTÁ COMPLETA!
 '''
 
 # REGISTRO DE PROGRESSO
@@ -20,18 +17,20 @@
 A FAZER:
 1 - Implementar lógica para carregar dados para edição (se possível).
 2 - Implementar lógica para gerar relatórios.
+'''
 
+'''
+MUDAR A ORDEM DE INSERÇÃO DE DADOS NO PGADMIN
+SE NÃO TIVER UMA TABELA OU COLUNA CRIADA, CRIA UMA NOVA
 '''
 
 # Importações necessárias
 import customtkinter as ctk
 from tkinter import *
-from tkinter import messagebox
-import openpyxl as xl
-from datetime import datetime
 
-import database  # Módulo para interagir com o banco de dados
+import util  #Módulo com funções auxiliares
 from Abas import Cadastro, Pesquisa, Edicao, Relatorio  # Importa as funções das abas
+import Pesquisa2
 
 # Configurações de aparência globais do customtkinter
 ctk.set_appearance_mode("System")
@@ -49,7 +48,7 @@ class App(ctk.CTk):
     # Configuração da janela principal
     def layout_config(self):
         self.title("Sistema de Gestão de Produtos")
-        self.geometry("820x650")  # Define o tamanho da janela
+        util.centralizar(820, 650, self)  # Centraliza a janela na tela
 
     # Menu de seleção de tema (Dark ou Light)
     def appearence(self):
@@ -89,7 +88,7 @@ class App(ctk.CTk):
         # Inicializa os conteúdos de cada aba
         Cadastro.Cadastro(self.tabview.tab("Cadastro"))  # Aba Cadastro
         self.executarPesquisa = lambda: Pesquisa.executarPesquisa(self)  # Prepara função de pesquisa
-        Pesquisa.setupPesquisa(self, self.tabview.tab("Pesquisa"))  # Aba Pesquisa
+        Pesquisa2.setupPesquisa(self, self.tabview.tab("Pesquisa"))  # Aba Pesquisa
         Edicao.setupEdicao(self, self.tabview.tab("Edição"))  # Aba Edição
         Relatorio.setupRelatorios(self, self.tabview.tab("Relatórios"))  # Aba Relatórios
 
