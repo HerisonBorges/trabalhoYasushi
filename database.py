@@ -9,7 +9,7 @@ def conectarBancoDeDados():
             host="localhost",
             database="produtos_db",
             user="postgres",
-            password="0l0k1nh0123",
+            password="159357.Ab",
         )
         return conexao
     except Exception as erro:
