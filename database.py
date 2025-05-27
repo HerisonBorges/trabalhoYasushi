@@ -9,7 +9,7 @@ def conectarBancoDeDados():
             host="localhost",
             database="produtos_db",
             user="postgres",
-            password="159357.Ab",
+            password="0l0k1nh0123",
         )
         return conexao
     except Exception as erro:
@@ -31,6 +31,7 @@ def insert(nome_produto, cod_produto, validade, fornecedor, categoria, unidade, 
         # Confirma a inserção no banco
         conexao.commit() #Salva as alterações
         cursor.close() # Fecha o QueryTool
+        conexao.close() #Fecha a conexão com o banco de dados
 
 def selectAll():
     conexao = conectarBancoDeDados()
@@ -62,7 +63,9 @@ def selectCampo(campo, valor):
         """
         cursor.execute(query, (valor,))
         resultado = cursor.fetchone()  # Retorna apenas um resultado
+        
         cursor.close()
+        conexao.close()
 
         return resultado
 # Função para buscar produtos com base em um termo que pode estar no nome, código ou fornecedor
@@ -83,37 +86,47 @@ def selectSpecific(termo):
         cursor.execute(query, (like_termo, like_termo, like_termo, like_termo))
         
         resultados = cursor.fetchall()  # Retorna todos os resultados encontrados
+        
         cursor.close()
+        conexao.close()
+        
         return resultados
 
 # Função para atualizar os dados de um produto já existente
-def update(cod_antigo, novos_dados):
+def update(cod_produto, campos_para_atualizar):
+        if not campos_para_atualizar:
+            return False  # Nada para atualizar
+
         conexao = conectarBancoDeDados()
         cursor = conexao.cursor()
-        
-        # Comando UPDATE, usando o código antigo para localizar o registro correto
-        cursor.execute("""
-            UPDATE produtos SET
-                nome_produto = %s,
-                cod_produto = %s,
-                validade = %s,
-                fornecedor = %s,
-                categoria = %s,
-                unidade = %s,
-                observacoes = %s
-            WHERE cod_produto = %s
-        """, (
-            novos_dados["nome_produto"],
-            novos_dados["cod_produto"],
-            novos_dados["validade"],
-            novos_dados["fornecedor"],
-            novos_dados["categoria"],
-            novos_dados["unidade"],
-            novos_dados["observacoes"],
-            cod_antigo
-        ))
 
+        # Monta dinamicamente a parte SET do SQL
+        set_clauses = []
+        valores = []
+        for campo, valor in campos_para_atualizar.items():
+            set_clauses.append(f"{campo} = %s")
+            valores.append(valor)
+
+        set_sql = ", ".join(set_clauses)
+        valores.append(cod_produto)  # Para o WHERE
+
+        sql = f"UPDATE produtos SET {set_sql} WHERE cod_produto = %s"
+
+        cursor.execute(sql, valores)
         conexao.commit()
         cursor.close()
+        conexao.close()
 
         return True  # Retorna True se a operação for bem-sucedida
+def delete(cod_produto):
+    conexao = conectarBancoDeDados()
+    cursor = conexao.cursor()
+
+    # Executa o comando DELETE para remover o produto com o código especificado
+    cursor.execute("""
+        DELETE FROM produtos WHERE cod_produto = %s
+    """, (cod_produto,))
+
+    conexao.commit()
+    cursor.close()
+    conexao.close()

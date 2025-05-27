@@ -2,13 +2,12 @@
 import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
-import openpyxl as xl
-from datetime import datetime
 import database  # módulo para interações com o banco de dados
 import util  # módulo com funções auxiliares
+from Abas import Pesquisa
 
 # Função principal da aba Cadastro
-def Cadastro(tab):
+def Cadastro(self, tab):
     # Mensagem inicial para o usuário
     span = ctk.CTkLabel(tab, text="Por favor, preencha todos os campos do formulário!", 
                         font=("century gothic bold", 16), text_color=["#000", "#fff"]).place(x=50, y=20)
@@ -37,6 +36,8 @@ def Cadastro(tab):
             database.insert(  # Salva no banco
                 nome_produto, cod_produto, validade, fornecedor, categoria, unidade, obs
             )
+        
+        Pesquisa.mostrarProduto(database.selectAll(), self.produtos_frame, self.header)
 
     # Variáveis que armazenam os dados digitados
     nome_value = StringVar()

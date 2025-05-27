@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 import database
 import util
+from Abas import Pesquisa
 
 # Função para configurar a aba de edição de produto
 def setupEdicao(app, tab):
@@ -102,5 +103,8 @@ def salvarAlteracoes(app):
     if sucesso:
         messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
         app.dados_antigos = novos_dados.copy()  # Atualiza os dados armazenados como referência
+        
+        Pesquisa.mostrarProduto(database.selectAll(), app.produtos_frame, app.header)
+        
     else:
         messagebox.showerror("Erro", "Erro ao atualizar o produto.")

@@ -1,73 +1,171 @@
-# Importações necessárias
 import customtkinter as ctk
-from tkinter import *
 from tkinter import messagebox
-import database  # Módulo responsável pelas operações com o banco de dados
-import util  # módulo com funções auxiliares
+from PIL import Image
+import database as db
+import util
 
-# Função que realiza a busca com base no termo digitado
-def executarPesquisa(self):
-    # Captura o termo de pesquisa e remove espaços em branco
-    termo = self.entryPesquisa.get().strip()
+campos = ["codigo", "nome", "validade", "fornecedor", "categoria", "unidade"] #As chaves do dicionário
+
+def mostrarProduto(array_produtos, container, header):
     
-    # Verifica se o usuário digitou algo
-    if not termo:
-        messagebox.showwarning("Pesquisa", "Por favor, digite um termo para pesquisar")
+    #Limpa o container antes de adicionar novos produtos
+    for widget in container.winfo_children():
+        if not widget == header:
+            widget.destroy()
+    
+    if not array_produtos:
+        ctk.CTkLabel(container, text="Nenhum produto encontrado.", font=("Arial", 14)).pack(pady=20)
         return
     
-    try:
-        # Busca produtos no banco de dados usando o termo
-        resultados = database.selectSpecific(termo)
+    produtos = [dict(zip(campos, produto)) for produto in array_produtos] #Cria uma lista de dicionários com os produtos
         
-        # Habilita o campo de resultados para edição temporária
-        self.resultadosPesquisa.configure(state="normal")
-        self.resultadosPesquisa.delete(1.0, END)  # Limpa o conteúdo atual
+    #Adiciona os produtos dentro do frame que mostra os produtos
+    for produto in produtos:
+        linha = ctk.CTkFrame(container) #cria um frame para cada produto
+        linha.pack(fill="x")
         
-        if resultados:
-            texto = ""
-            for row in resultados:
-                # Monta o texto com os dados dos produtos encontrados
-                texto += (f"Produto: {row[0]}\n"
-                          f"Código: {row[1]}\n"
-                          f"Validade: {row[2]}\n"
-                          f"Fornecedor: {row[3]}\n"
-                          f"Categoria: {row[4]}\n"
-                          f"Unidade: {row[5]}\n"
-                          f"Observações: {row[6]}\n"
-                          + "="*50 + "\n")
-            # Insere o texto no campo de resultados
-            self.resultadosPesquisa.insert(END, texto)
-        else:
-            # Exibe mensagem se nenhum produto for encontrado
-            self.resultadosPesquisa.insert(END, "Nenhum produto encontrado com esse termo.")
+        # Criação dos labels para cada campo do produto
+        labelNome = ctk.CTkLabel(linha, text=produto["nome"], width=80) #labelNome e cod estão trocados e estou com preguiça de consertar, mas tá funcionando
+        labelNome.pack(side="left")
         
-        # Desabilita o campo novamente para edição
-        self.resultadosPesquisa.configure(state="disabled")
-            
-    except Exception as e:
-        # Em caso de erro, exibe uma mensagem de erro
-        messagebox.showerror("Erro", f"Erro ao pesquisar produtos:\n{str(e)}")
+        labelCod = ctk.CTkLabel(linha, text=produto["codigo"], width=80)
+        labelCod.pack(side="left")
+        
+        labelForn = ctk.CTkLabel(linha, text=produto["validade"], width=80) #Não questiona, só aceita
+        labelForn.pack(side="left")
+        
+        labelVal = ctk.CTkLabel(linha, text=produto["fornecedor"], width=80)
+        labelVal.pack(side="left")
+        
+        labelCat = ctk.CTkLabel(linha, text=produto["categoria"], width=80)
+        labelCat.pack(side="left")
+        
+        labelUnidade = ctk.CTkLabel(linha, text=produto["unidade"], width=80)
+        labelUnidade.pack(side="left")
+        
+        # Linha vertical de separação
+        ctk.CTkLabel(linha, text="│", width=10, font=("Arial", 12, "bold")).pack(side="left")
+        
+        #Local para escrever a quantidade
+        entryQuant = ctk.CTkEntry(linha, width=40)
+        entryQuant.pack(side="left", padx=5)
+        
+        #Soma a quantidade com a unidade que já existe
+        bntSoma = ctk.CTkButton(
+            linha, 
+            text="+", 
+            width=30, 
+            fg_color="transparent",
+            hover_color="#2B2B2B",
+            font=("Arial", 16, "bold"),
+            command=lambda e=entryQuant, u=labelUnidade, c=labelCod.cget("text"): adicionarUnidade(e, {"unidade": u.cget("text")}, u, c)
+        ) #temos que p=produto e e=entryQuant para não pegar somente o último produto
+        bntSoma.pack(side="left", padx=2)
+        
+        #Subtrai a quantidade com a unidade que já existe somente se for menor ou igual
+        bntSub = ctk.CTkButton(
+            linha, 
+            text="-", 
+            width=30, 
+            fg_color="transparent",
+            hover_color="#2B2B2B",
+            font=("Arial", 16, "bold"),
+            command=lambda e=entryQuant, u=labelUnidade, c=labelCod.cget("text"): removerUnidade(e, {"unidade": u.cget("text")}, u, c)
+        )
+        bntSub.pack(side="left", padx=4)
+        
+        img_trash= ctk.CTkImage(Image.open("img\icons8-trash-50.png"), size=(18,18))
+        #Excluir o produto
+        bntExcluir = ctk.CTkButton(
+            linha,
+            text="",
+            width=26,
+            height=26,
+            image= img_trash,
+            fg_color="#b10000",
+            hover_color="#a10000",
+            command=lambda l=labelNome: excluirProduto(l)
+        )
+        bntExcluir.pack(side="left", padx=5)
+        
+        #Altera a fonte e o cursor ao passar o mouse em cima dos botões
+        util.mudarCursor(bntSoma)
+        util.mudarCursor(bntSub)
+        util.mudarCursor(bntExcluir)
 
-# Função para configurar a aba de pesquisa
+#Soma a quantidade do produto com o valor digitado no entryQuant
+def adicionarUnidade(entryQuant, dict, labelUnidade ,cod):
+    try:
+        valor = int(entryQuant.get())
+        labelUnidade.configure(text=dict["unidade"] + valor) #Atualiza o label com a nova quantidade
+        
+        db.update(cod, dict)
+    
+    except ValueError as e:
+        messagebox.showerror("Erro", "Digite um número válido.")
+#Subtrai a quantidade do produto com o valor digitado no entryQuant
+def removerUnidade(entryQuant, dict, labelUnidade, cod):
+    try:
+        valor = int(entryQuant.get())
+        if valor > dict["unidade"]:
+            messagebox.showerror("Erro", "Valor maior que o disponível.")
+            return
+        
+        else:
+            labelUnidade.configure(text=dict["unidade"] - valor) #Atualiza o label com a nova quantidade
+            
+            db.update(cod, dict)
+    
+    except ValueError as e:
+        messagebox.showerror("Erro", "Digite um número válido.")
+
+#Função para excluir um produto
+def excluirProduto(labelCod):
+    cod = labelCod.cget("text")
+    
+    if messagebox.askyesno("Confirmação", f"Você tem certeza que deseja excluir o produto com código {cod}?"):
+        print(cod)
+        db.delete(cod)
+        messagebox.showinfo("Sucesso", "Produto excluído com sucesso.")
+        labelCod.master.destroy()  # Remove a linha do produto excluído
+    else:
+        messagebox.showinfo("Cancelado", "Exclusão cancelada.")
+
 def setupPesquisa(self, tab):
-    # Frame principal dentro da aba
+    # Configuração do layout da aba
     frame = ctk.CTkFrame(tab)
     frame.pack(padx=20, pady=20, fill="both", expand=True)
-
-    # Título da aba
-    lblTitulo = ctk.CTkLabel(frame, text="Pesquisar Produtos", font=("Century Gothic", 20, "bold"))
-    lblTitulo.grid(row=0, column=0, columnspan=3, pady=(0, 20))
-
-    # Campo de entrada para o termo de pesquisa
-    self.entryPesquisa = ctk.CTkEntry(frame, width=400, placeholder_text="Digite nome, código ou fornecedor")
-    self.entryPesquisa.grid(row=1, column=0, sticky="w", padx=(0, 10))
-
-    # Botão de busca que chama a função executarPesquisa
-    botaoPesquisa = ctk.CTkButton(frame, text="BUSCAR", fg_color="#2ecc71", command=lambda: executarPesquisa(self))
-    botaoPesquisa.grid(row=1, column=1, sticky="w")
     
+    barra_frame = ctk.CTkFrame(frame)
+    barra_frame.pack(anchor="e", pady=(0,10))
+    
+    #Campo de entrada para o termo de pesquisa
+    self.entryPesquisa = ctk.CTkEntry(barra_frame, width=200, placeholder_text="nome, código, fornecedor ou categoria")
+    self.entryPesquisa.pack(side="left", padx=(0, 5))
+
     # Campo de texto que exibe os resultados da busca (inicialmente desabilitado)
-    self.resultadosPesquisa = ctk.CTkTextbox(frame, width=650, height=300, state="disabled")
-    self.resultadosPesquisa.grid(row=2, column=0, columnspan=3, pady=20)
+    self.produtos_frame = ctk.CTkFrame(frame)
+    self.produtos_frame.pack(fill="x", pady=20)
+    
+    # Linha de cabeçalho
+    self.header = ctk.CTkFrame(self.produtos_frame, fg_color="#333333")
+    self.header.pack(fill="x", pady=(0, 5))
+    
+    #Preenche o cabeçalho com os campos
+    for campo, largura in zip(campos, [80, 80, 80, 80, 80, 80]):
+        ctk.CTkLabel(self.header, text=campo.upper(), width=largura, font=("Arial", 12, "bold")).pack(side="left")
+        
+    # Linha vertical de separação no cabeçalho
+    ctk.CTkLabel(self.header, text="│", width=10, font=("Arial", 12, "bold")).pack(side="left")
+    ctk.CTkLabel(self.header, text="Ações", width=120, font=("Arial", 12, "bold")).pack(side="left")
+    
+    # Botão de busca que chama a função executarPesquisa
+    botaoPesquisa = ctk.CTkButton(barra_frame, width=70 ,text="BUSCAR", fg_color="#2ecc71", hover_color="#27ae60",text_color="#000", command=lambda: mostrarProduto(db.selectSpecific(self.entryPesquisa.get().strip()), self.produtos_frame, self.header))
+    botaoPesquisa.pack(side="left")
+    
+    botaoPesquisa.bind("<Enter>", lambda e: botaoPesquisa.configure(fg_color="#27ae60", cursor="hand2")) #Muda a cor do botão ao passar o mouse
+    botaoPesquisa.bind("<Leave>", lambda e: botaoPesquisa.configure(fg_color="#2acc71", cursor="hand2")) #Volta a cor original
+    
+    mostrarProduto(db.selectAll(), self.produtos_frame, self.header)
     
     self.bind("<Button-1>", util.tirarFoco)  # Remove o foco do campo de busca ao clicar fora dele

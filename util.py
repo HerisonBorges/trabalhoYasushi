@@ -5,11 +5,14 @@ from datetime import datetime
 
 #FUNÇÕES GERAIS
 def tirarFoco(event):
-    widget_atual = event.widget.focus_get()
-    if widget_atual and isinstance(widget_atual, ctk.CTkEntry):
-        widget_atual.focus_set()  # Mantém o foco no campo de entrada
-    else:
-        event.widget.focus_set()  # Mantém o foco no widget atual
+    try:
+        widget_atual = event.widget.focus_get()
+        if widget_atual and isinstance(widget_atual, ctk.CTkEntry):
+            widget_atual.focus_set()  # Mantém o foco no campo de entrada
+        else:
+            event.widget.focus_set()  # Mantém o foco no widget atual
+    except AttributeError:
+        pass
         
 def clear(var):
     for val in var:
@@ -26,6 +29,10 @@ def centralizar(largura, altura, janela):
     pos_y = int(janela.winfo_screenheight() / 2 - altura_janela / 2)
 
     janela.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
+    
+def mudarCursor(botao):
+    botao.bind("<Enter>", lambda e: e.widget.configure(cursor="hand2"))
+    botao.bind("<Leave>", lambda e: e.widget.configure(cursor="arrow"))
 
 #FUNÇÕES DE VALIDAÇÃO DE CADASTRO
 #Função que formata automaticamente a data de validade para o padrão dd/mm/aaaa

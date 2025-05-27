@@ -1,11 +1,5 @@
-# IDEIAS PARA MELHORIAS:
-'''
-1. Criar uma área de remoção de produtos.
-'''
-
-'''
-ATENÇÃO: PESQUISA2 VAI SER A NOVA ABA PESQUISA! PESQUISA AINDA EXISTE POR CAUSA QUE PESQUISA2 NÃO ESTÁ COMPLETA!
-'''
+#####################ATENÇÃO######################
+#     INSTALE A BIBLIOTECA "Pillow" ---- pip install Pillow
 
 # REGISTRO DE PROGRESSO
 '''
@@ -30,7 +24,6 @@ from tkinter import *
 
 import util  #Módulo com funções auxiliares
 from Abas import Cadastro, Pesquisa, Edicao, Relatorio  # Importa as funções das abas
-import Pesquisa2
 
 # Configurações de aparência globais do customtkinter
 ctk.set_appearance_mode("System")
@@ -86,9 +79,9 @@ class App(ctk.CTk):
         self.tabview.add("Relatórios")
 
         # Inicializa os conteúdos de cada aba
-        Cadastro.Cadastro(self.tabview.tab("Cadastro"))  # Aba Cadastro
+        Cadastro.Cadastro(self, self.tabview.tab("Cadastro"))  # Aba Cadastro
         self.executarPesquisa = lambda: Pesquisa.executarPesquisa(self)  # Prepara função de pesquisa
-        Pesquisa2.setupPesquisa(self, self.tabview.tab("Pesquisa"))  # Aba Pesquisa
+        Pesquisa.setupPesquisa(self, self.tabview.tab("Pesquisa"))  # Aba Pesquisa
         Edicao.setupEdicao(self, self.tabview.tab("Edição"))  # Aba Edição
         Relatorio.setupRelatorios(self, self.tabview.tab("Relatórios"))  # Aba Relatórios
 
