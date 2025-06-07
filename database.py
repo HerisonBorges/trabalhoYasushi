@@ -113,9 +113,12 @@ def update(cod_produto, campos_para_atualizar):
         sql = f"UPDATE produtos SET {set_sql} WHERE cod_produto = %s"
 
         cursor.execute(sql, valores)
+        
         conexao.commit()
         cursor.close()
         conexao.close()
+        #print("SQL:", sql)
+        #print("Valores:", valores)
 
         return True  # Retorna True se a operação for bem-sucedida
 def delete(cod_produto):

@@ -21,8 +21,14 @@ def mostrarProduto(array_produtos, container, header):
         
     #Adiciona os produtos dentro do frame que mostra os produtos
     for produto in produtos:
-        linha = ctk.CTkFrame(container) #cria um frame para cada produto
+        linha = ctk.CTkFrame(container)
         linha.pack(fill="x")
+        
+        #Borda esquerda
+        ctk.CTkFrame(linha, width=2, fg_color="#333333", height=40).pack(side="left", fill="y")
+        
+         #Borda direita
+        ctk.CTkFrame(linha, width=2, fg_color="#333333", height=40).pack(side="right", fill="y")
         
         # Criação dos labels para cada campo do produto
         labelNome = ctk.CTkLabel(linha, text=produto["nome"], width=80) #labelNome e cod estão trocados e estou com preguiça de consertar, mas tá funcionando
@@ -43,9 +49,6 @@ def mostrarProduto(array_produtos, container, header):
         labelUnidade = ctk.CTkLabel(linha, text=produto["unidade"], width=80)
         labelUnidade.pack(side="left")
         
-        # Linha vertical de separação
-        ctk.CTkLabel(linha, text="│", width=10, font=("Arial", 12, "bold")).pack(side="left")
-        
         #Local para escrever a quantidade
         entryQuant = ctk.CTkEntry(linha, width=40)
         entryQuant.pack(side="left", padx=5)
@@ -56,9 +59,9 @@ def mostrarProduto(array_produtos, container, header):
             text="+", 
             width=30, 
             fg_color="transparent",
-            hover_color="#2B2B2B",
+            hover_color="#4E4E4E",
             font=("Arial", 16, "bold"),
-            command=lambda e=entryQuant, u=labelUnidade, c=labelCod.cget("text"): adicionarUnidade(e, {"unidade": u.cget("text")}, u, c)
+            command=lambda e=entryQuant, u=labelUnidade, c=labelNome.cget("text"): adicionarUnidade(e, {"unidade": u.cget("text")}, u, c)
         ) #temos que p=produto e e=entryQuant para não pegar somente o último produto
         bntSoma.pack(side="left", padx=2)
         
@@ -68,13 +71,13 @@ def mostrarProduto(array_produtos, container, header):
             text="-", 
             width=30, 
             fg_color="transparent",
-            hover_color="#2B2B2B",
+            hover_color="#4E4E4E",
             font=("Arial", 16, "bold"),
-            command=lambda e=entryQuant, u=labelUnidade, c=labelCod.cget("text"): removerUnidade(e, {"unidade": u.cget("text")}, u, c)
+            command=lambda e=entryQuant, u=labelUnidade, c=labelNome.cget("text"): removerUnidade(e, {"unidade": u.cget("text")}, u, c)
         )
         bntSub.pack(side="left", padx=4)
         
-        img_trash= ctk.CTkImage(Image.open("img\icons8-trash-50.png"), size=(18,18))
+        img_trash= ctk.CTkImage(Image.open("img\delete.png"), size=(18,18))
         #Excluir o produto
         bntExcluir = ctk.CTkButton(
             linha,
@@ -82,8 +85,8 @@ def mostrarProduto(array_produtos, container, header):
             width=26,
             height=26,
             image= img_trash,
-            fg_color="#b10000",
-            hover_color="#a10000",
+            fg_color="transparent",
+            hover_color="#4E4E4E",
             command=lambda l=labelNome: excluirProduto(l)
         )
         bntExcluir.pack(side="left", padx=5)
@@ -96,28 +99,47 @@ def mostrarProduto(array_produtos, container, header):
 #Soma a quantidade do produto com o valor digitado no entryQuant
 def adicionarUnidade(entryQuant, dict, labelUnidade ,cod):
     try:
-        valor = int(entryQuant.get())
-        labelUnidade.configure(text=dict["unidade"] + valor) #Atualiza o label com a nova quantidade
+        valor = int(entryQuant.get()) + dict["unidade"]
+        dict["unidade"] = valor 
         
+        labelUnidade.configure(text=valor) #Atualiza o label com a nova quantidade
         db.update(cod, dict)
     
     except ValueError as e:
-        messagebox.showerror("Erro", "Digite um número válido.")
+        if entryQuant.get() == "":
+            valor = dict["unidade"] + 1
+            dict["unidade"] = valor
+            
+            labelUnidade.configure(text=valor)
+            db.update(cod, dict) #atualiza o banco de dados
+        
+        else:
+            messagebox.showerror("Erro", "Digite um número válido.")
+            
 #Subtrai a quantidade do produto com o valor digitado no entryQuant
 def removerUnidade(entryQuant, dict, labelUnidade, cod):
     try:
-        valor = int(entryQuant.get())
+        valor = dict["unidade"] - int(entryQuant.get())
         if valor > dict["unidade"]:
             messagebox.showerror("Erro", "Valor maior que o disponível.")
             return
         
         else:
-            labelUnidade.configure(text=dict["unidade"] - valor) #Atualiza o label com a nova quantidade
+            dict["unidade"] = valor
             
-            db.update(cod, dict)
+            labelUnidade.configure(text=valor) #Atualiza o label com a nova quantidade           
+            db.update(cod, dict) #atualiza o banco de dados
     
     except ValueError as e:
-        messagebox.showerror("Erro", "Digite um número válido.")
+        if dict["unidade"] < 1:
+            messagebox.showerror("Erro", "Quantidade zerada desse produto")
+        
+        else:
+            valor = dict["unidade"] - 1
+            dict["unidade"] = valor
+            
+            labelUnidade.configure(text=valor) #Atualiza o label com a nova quantidade
+            db.update(cod, dict) #atualiza o banco de dados
 
 #Função para excluir um produto
 def excluirProduto(labelCod):
@@ -156,7 +178,6 @@ def setupPesquisa(self, tab):
         ctk.CTkLabel(self.header, text=campo.upper(), width=largura, font=("Arial", 12, "bold")).pack(side="left")
         
     # Linha vertical de separação no cabeçalho
-    ctk.CTkLabel(self.header, text="│", width=10, font=("Arial", 12, "bold")).pack(side="left")
     ctk.CTkLabel(self.header, text="Ações", width=120, font=("Arial", 12, "bold")).pack(side="left")
     
     # Botão de busca que chama a função executarPesquisa
