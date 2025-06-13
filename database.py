@@ -7,9 +7,9 @@ def conectarBancoDeDados():
         # Conecta ao banco de dados PostgreSQL
         conexao = psycopg2.connect(
             host="localhost",
-            database="produtos_db",
+            database="Projetosexta",
             user="postgres",
-            password="0l0k1nh0123",
+            password="1234",
         )
         return conexao
     except Exception as erro:

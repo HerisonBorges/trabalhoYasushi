@@ -77,14 +77,15 @@ def mostrarProduto(array_produtos, container, header):
         )
         bntSub.pack(side="left", padx=4)
         
-        img_trash= ctk.CTkImage(Image.open("img\delete.png"), size=(18,18))
+        '''img_trash= ctk.CTkImage(Image.open("img\delete.png"), size=(18,18))'''
         #Excluir o produto
         bntExcluir = ctk.CTkButton(
             linha,
-            text="",
+            text="Excluir",
+            text_color="#af0000",
             width=26,
             height=26,
-            image= img_trash,
+            
             fg_color="transparent",
             hover_color="#4E4E4E",
             command=lambda l=labelNome: excluirProduto(l)
@@ -99,6 +100,7 @@ def mostrarProduto(array_produtos, container, header):
 #Soma a quantidade do produto com o valor digitado no entryQuant
 def adicionarUnidade(entryQuant, dict, labelUnidade ,cod):
     try:
+        print(entryQuant.get(), dict["unidade"])
         valor = int(entryQuant.get()) + dict["unidade"]
         dict["unidade"] = valor 
         
@@ -107,7 +109,7 @@ def adicionarUnidade(entryQuant, dict, labelUnidade ,cod):
     
     except ValueError as e:
         if entryQuant.get() == "":
-            valor = dict["unidade"] + 1
+            valor = int(dict["unidade"]) + 1
             dict["unidade"] = valor
             
             labelUnidade.configure(text=valor)
@@ -131,11 +133,11 @@ def removerUnidade(entryQuant, dict, labelUnidade, cod):
             db.update(cod, dict) #atualiza o banco de dados
     
     except ValueError as e:
-        if dict["unidade"] < 1:
+        if int(dict["unidade"]) < 1:
             messagebox.showerror("Erro", "Quantidade zerada desse produto")
         
         else:
-            valor = dict["unidade"] - 1
+            valor = int(dict["unidade"])- 1
             dict["unidade"] = valor
             
             labelUnidade.configure(text=valor) #Atualiza o label com a nova quantidade
